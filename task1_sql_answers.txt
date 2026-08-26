@@ -1,0 +1,177 @@
+Setting up the notebook:
+
+import sqlite3
+import pandas as pd
+
+conn = sqlite3.connect(r'c:\Users\HP\OneDrive\Desktop\download')
+print(pd.read_sql_query("SELECT * FROM members", conn))
+print(pd.read_sql_query("SELECT * FROM books", conn))
+print(pd.read_sql_query("SELECT * FROM checkouts", conn))
+
+==========
+
+Question 1: How much is each member borrowing?
+
+Code:
+query='''
+SELECT members.member_id, members.first_name, members.last_name, COUNT(checkouts.member_id) AS checkout_count
+FROM members
+LEFT JOIN checkouts
+ON checkouts.member_id = members.member_id
+GROUP BY members.member_id
+'''
+print(pd.read_sql_query(query, conn))
+
+Explanation:
+I selected the member id and his full name and the checkout count to be shown.
+I joined members and checkouts to show the member's data while showing his checkouts count, using the primary key "members.member_id" and the foreign key "checkouts.member_id".
+I used "LEFT JOIN" method to make sure all members are shown (including those with no checkouts).
+I used GROUP BY member id to group all checkouts which belong to the same member so they can be counted.
+
+Result:
+    member_id first_name last_name  checkout_count
+0        1001      Salma   Ibrahim               1
+1        1002      Fares     Saleh               2
+2        1003     Bassel    Hegazy               9
+3        1004      Fares     Wahba               0
+4        1005    Youssef     Halim               3
+..        ...        ...       ...             ...
+75       1076       Dina     Wahba               7
+76       1077       Lina    Rashad               6
+77       1078     Habiba     Osman               0
+78       1079       Rana     Osman              10
+79       1080     Bassel     Wahba               2
+
+[80 rows x 4 columns]
+
+==========
+
+Question 2: Which books match a chosen author pattern?
+
+Code:
+print(pd.read_sql_query("SELECT title, author FROM books WHERE author LIKE 'H%'", conn)) #Author Pattern: name starting with "H"
+
+Explanation:
+My pattern is: the author name starts with the letter "H"
+I selected the book title and its author name to be shown.
+I used WHERE method to make a rule that the author should follow a specific pattern.
+I used LIKE 'H%' to show authors starting with "H", the (%) means any number of characters
+
+Result:
+                     title       author
+0       Songs of the Oasis   Hoda Bakry
+1  The Beekeeper's Almanac   Hoda Bakry
+2  Shadows on the Corniche  Hani Nagati
+3     The Ninth Lighthouse  Hani Nagati
+
+==========
+
+Question 3: What are the most popular books?
+
+Code:
+query = '''
+SELECT books.book_id, books.title, COUNT(*) AS borrows_count
+FROM checkouts
+JOIN books
+ON checkouts.book_id = books.book_id
+GROUP BY checkouts.book_id
+ORDER BY COUNT(*) DESC
+LIMIT 5
+'''
+print(pd.read_sql_query(query, conn))
+
+Explanation:
+I selected the book id and its title and how much it was borrowed to be shown.
+I joined checkouts and books to show the book data while showing its borrows count, using the primary key "books.book_id" and the foreign key "checkouts.book_id".
+I used GROUP BY book id to group all checkouts which belong to the same book so they can be counted.
+I used ORDER BY DESC to sort the books from the most borrowed to the least.
+I used LIMIT 5 to show only the first 5 most borrowed books.
+
+Result:
+  book_id                   title  borrows_count
+0      501         The Silver Kite             57
+1      507   Fossils and Fireflies             55
+2      513  Circuits for Beginners             46
+3      519        Kites Over Cairo             38
+4      525    Storms and Sailboats             25
+
+==========
+
+Question 4: Who are the most active readers?
+
+Code:
+query = '''
+SELECT members.member_id, members.first_name, COUNT(*) AS borrows_count
+FROM checkouts
+JOIN members
+ON checkouts.member_id = members.member_id
+GROUP BY checkouts.member_id
+ORDER BY COUNT(*) DESC
+LIMIT 10
+'''
+print(pd.read_sql_query(query, conn))
+
+Explanation:
+I selected the member id and his name and how much he borrowed to be shown.
+I joined checkouts and members to show the member's data while showing his borrows count, using the primary key "members.member_id" and the foreign key "checkouts.member_id".
+I used GROUP BY member id to group all checkouts which belong to the same member so they can be counted.
+I used ORDER BY DESC to sort the members from the most active to the least.
+I used LIMIT 10 to show only the first 10 most active members.
+
+Result:
+   member_id first_name  borrows_count
+0       1034        Aya             25
+1       1044     Sherif             21
+2       1008       Ziad             19
+3       1027    Mostafa             18
+4       1010       Nour             18
+5       1065       Adam             17
+6       1024    Youssef             17
+7       1018      Ahmed             17
+8       1047       Sara             16
+9       1030       Reem             16
+
+==========
+
+Question 5: What does a neighborhood's activity look like further back in time?
+
+Code:
+query = '''
+SELECT checkouts.checkout_id, members.first_name, checkouts.checkout_date, members.neighborhood
+FROM checkouts
+JOIN members
+ON checkouts.member_id = members.member_id
+WHERE members.neighborhood = 'Maadi'
+ORDER BY checkouts.checkout_date DESC
+LIMIT 10
+OFFSET 10
+'''
+print(pd.read_sql_query(query, conn)) #What does a neighborhood's (Maadi) activity look like further back in time?
+
+Explanation:
+I chose the neighborhood (Maadi)
+I selected the checkout id and and the member's first name and the checkout_date and the member's neighborhood to be shown.
+I joined checkouts and members to show the checkout data while showing the member's data, using the primary key "members.member_id" and the foreign key "checkouts.member_id".
+I used WHERE method to make a rule that the member's neighborhood should be Maadi.
+I used ORDER BY DESC to sort the checkouts from the most recent to the least.
+I used LIMIT 10 to show only the first 10 most recent checkouts.
+I used OFFSET 10 to skip the most 10 recent checkouts (Which means I will show the next 10 checkouts).
+
+Result:
+   checkout_id first_name checkout_date neighborhood
+0         9103     Bassel    2025-09-04        Maadi
+1         9081       Adam    2025-08-25        Maadi
+2         9001       Ziad    2025-08-23        Maadi
+3         9050     Bassel    2025-08-21        Maadi
+4         9085      Ahmed    2025-08-19        Maadi
+5         9055      Hamza    2025-08-08        Maadi
+6         9023      Ahmed    2025-08-04        Maadi
+7         9004       Ziad    2025-07-27        Maadi
+8         9051     Bassel    2025-07-22        Maadi
+9         9010     Hassan    2025-07-22        Maadi
+
+===============
+
+Web Page vs API
+
+A web page is made for people to read using a browser, while an API is made for programs to access data directly in a more 'official' way, and a database is also read easily using programs (like sql). In this project, the Reading Kickoff data was on a web page, so I had to extract all the tables from the HTML using Pandas (in the reading Kickoff it was only one table), then selecting the table which I want to use.
