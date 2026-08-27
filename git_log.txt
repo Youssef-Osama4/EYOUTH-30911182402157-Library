@@ -1,0 +1,13 @@
+601cc3a Part of task 1 was added to the ipynb notebook (NOT COMPLETE)
+e7a22f9 The required file from task 1 was added task1_combined_data.csv
+d3beccb Part of Task 2 was added to the ipynb notebook (NOT COMPLETE)
+75b2912 Finished Task 1 in the ipynb notebook, and also did some changes on the whole notebook (and renamed it)
+b768567 Deleted the old file (with the old name)
+a779d8d Added task1_combined_data.csv after the changes on the notebook
+0ac7c5f Added the required txt file for task 1 (task1_sql_answers.txt)
+e822931 I added Task 2 to the ipynb notebook
+e85aed4 Added task2_cleaned_data
+03ec82a Added the Integrity Report for task 2
+655149a I fixed something in the notebook in task 2, so I added its 2 required files again after the change (in addition to the ipynb notebook)
+c7baf86 Removed the old data integrity file
+04c078a I added the fairness reflection report and added task 3 in the notebook
